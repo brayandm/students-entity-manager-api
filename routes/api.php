@@ -18,4 +18,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('students', [StudentController::class, 'addStudent']);
+Route::get('/students', 'App\Http\Controllers\StudentController@getStudents');
+
+Route::get('/students/{id}', 'App\Http\Controllers\StudentController@getStudent');
+
+Route::post('/students', 'App\Http\Controllers\StudentController@addStudent');
+
+Route::delete('/students/{id}', 'App\Http\Controllers\StudentController@deleteStudent');
+
+Route::put('/students/{id}', 'App\Http\Controllers\StudentController@editStudent');
+
