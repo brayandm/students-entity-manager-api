@@ -8,9 +8,19 @@ use Illuminate\Support\Facades\Storage;
 
 class StudentService
 {
+    private function getFile($filename)
+    {
+        return Storage::get('public/pictures/'.$filename);
+    }
+
+    private function existsFile($filename)
+    {
+        return $filename != NULL && Storage::exists('public/pictures/'.$filename);
+    }
+
     private function deleteFile($filename)
     {
-        if($filename != NULL && Storage::exists('public/pictures/'.$filename))
+        if($this->existsFile($filename))
         {
             Storage::delete('public/pictures/'.$filename);
         }
@@ -20,6 +30,10 @@ class StudentService
     {
         $student->firstname = $data->firstname;
         $student->lastname = $data->lastname;
+        $student->email = $data->email;
+        $student->birthdate = $data->birthdate;
+        $student->address = $data->address;
+        $student->score = $data->score;
         $student->save();
 
         $this->deleteFile($student->photo);
@@ -64,5 +78,13 @@ class StudentService
     public function edit($data, $id)
     {
         $this->save($this->get($id), $data);
+    }
+
+    public function getPhoto($photo)
+    {
+        if($this->existsFile($photo))
+        {
+            return $this->getFile($photo);
+        }
     }
 }
