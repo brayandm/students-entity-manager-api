@@ -28,3 +28,4 @@ Route::delete('/students/{id}', 'App\Http\Controllers\StudentController@deleteSt
 
 Route::post('/students/{id}', 'App\Http\Controllers\StudentController@editStudent');
 
+Route::get('/pictures/{photo}', 'App\Http\Controllers\StudentController@getPhoto');

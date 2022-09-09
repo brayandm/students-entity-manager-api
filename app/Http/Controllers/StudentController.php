@@ -21,11 +21,11 @@ class StudentController extends Controller
         $validator = Validator::make($request->all(), [
             'firstname' => 'required|max:120',
             'lastname' => 'required|max:120',
-            // 'email' => 'required|email|max:120',
-            'photo' => 'nullable|image',
-            // 'birthdate' => 'required|date',
-            // 'address' => 'required|max:255',
-            // 'score' => 'required|numeric|between:0,999999'
+            'email' => 'required|email|max:120',
+            'photo' => 'required|image',
+            'birthdate' => 'required|date',
+            'address' => 'required|max:255',
+            'score' => 'required|numeric|between:0,999999'
         ]);
 
         return $validator;
@@ -89,5 +89,10 @@ class StudentController extends Controller
         $this->studentsService->edit($request, $id);
 
         return response()->json([]);
+    }
+
+    public function getPhoto($photo)
+    {
+        return $this->studentsService->getPhoto($photo);
     }
 }
