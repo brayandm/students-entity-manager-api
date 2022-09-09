@@ -26,5 +26,5 @@ Route::post('/students', 'App\Http\Controllers\StudentController@addStudent');
 
 Route::delete('/students/{id}', 'App\Http\Controllers\StudentController@deleteStudent');
 
-Route::put('/students/{id}', 'App\Http\Controllers\StudentController@editStudent');
+Route::post('/students/{id}', 'App\Http\Controllers\StudentController@editStudent');
 
