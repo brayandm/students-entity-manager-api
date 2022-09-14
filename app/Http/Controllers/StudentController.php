@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Services\StudentService;
 
 class StudentController extends Controller
 {
-    private StudentService $studentsService;
+    private StudentService $studentService;
 
-    public function __construct(StudentService $studentsService)
+    public function __construct(StudentService $studentService)
     {
-        $this->studentsService = $studentsService;
+        $this->studentService = $studentService;
     }
 
     private function validateCorrectStudent(Request $request)
@@ -33,17 +32,17 @@ class StudentController extends Controller
 
     public function getStudents()
     {
-        return response()->json(['students' => $this->studentsService->getAll()]);
+        return response()->json(['students' => $this->studentService->getAll()]);
     }
 
     public function getStudent($id)
     {
-        if(!$this->studentsService->exists($id))
+        if(!$this->studentService->exists($id))
         {
             return response()->json(['errors' => 'The student with id='.$id.' doesn\'t exist'], 400);
         }
 
-        return response()->json(['students' => $this->studentsService->get($id)]);
+        return response()->json(['students' => $this->studentService->get($id)]);
     }
 
     public function addStudent(Request $request)
@@ -55,26 +54,26 @@ class StudentController extends Controller
             return response()->json(['errors' => $validator->errors()], 400);
         }
 
-        $this->studentsService->add($request);
+        $this->studentService->add($request);
 
         return response()->json([]);
     }
 
     public function deleteStudent($id)
     {
-        if(!$this->studentsService->exists($id))
+        if(!$this->studentService->exists($id))
         {
             return response()->json(['errors' => 'The student with id='.$id.' doesn\'t exist'], 400);
         }
 
-        $this->studentsService->delete($id);
+        $this->studentService->delete($id);
 
         return response()->json();
     }
 
     public function editStudent(Request $request, $id)
     {
-        if(!$this->studentsService->exists($id))
+        if(!$this->studentService->exists($id))
         {
             return response()->json(['errors' => 'The student with id='.$id.' doesn\'t exist'], 400);
         }
@@ -86,13 +85,13 @@ class StudentController extends Controller
             return response()->json(['errors' => $validator->errors()], 400);
         }
 
-        $this->studentsService->edit($request, $id);
+        $this->studentService->edit($request, $id);
 
         return response()->json([]);
     }
 
     public function getPhoto($photo)
     {
-        return $this->studentsService->getPhoto($photo);
+        return $this->studentService->getPhoto($photo);
     }
 }
