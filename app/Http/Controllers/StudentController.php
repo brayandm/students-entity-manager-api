@@ -22,7 +22,7 @@ class StudentController extends Controller
             'firstname' => 'required|max:120',
             'lastname' => 'required|max:120',
             'email' => 'required|email|max:120',
-            'photo' => 'required|image',
+            'photo' => 'image',
             'birthdate' => 'required|date',
             'address' => 'required|max:255',
             'score' => 'required|numeric|between:0,999999'

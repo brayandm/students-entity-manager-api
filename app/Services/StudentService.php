@@ -36,11 +36,13 @@ class StudentService
         $student->score = $data->score;
         $student->save();
 
-        $this->deleteFile($student->photo);
-
-        $picture = $data->file('photo');
-        $student->photo = $student->id.'.'.$picture->getClientOriginalExtension();
-        Storage::putFileAs('public/pictures', $picture, $student->photo);
+        if($data->photo)
+        {
+            $this->deleteFile($student->photo);
+            $picture = $data->file('photo');
+            $student->photo = $student->id.'.'.$picture->getClientOriginalExtension();
+            Storage::putFileAs('public/pictures', $picture, $student->photo);
+        }
 
         $student->touch();
         $student->save();
