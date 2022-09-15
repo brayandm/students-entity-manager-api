@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use App\User;
 use App\Models\Student;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,6 +20,7 @@ class UserTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('public');
     }
 
     private function register()
@@ -60,7 +62,7 @@ class UserTest extends TestCase
 
         $response = $this->register();
 
-        //Get Token
+        //Get token
 
         $token = $response['access_token'];
 
@@ -112,7 +114,7 @@ class UserTest extends TestCase
 
         $response = $this->register();
 
-        //Get Token
+        //Get token
 
         $token = $response['access_token'];
 
@@ -157,7 +159,7 @@ class UserTest extends TestCase
 
         $response = $this->register();
 
-        //Get Token
+        //Get token
 
         $token = $response['access_token'];
 
@@ -188,5 +190,48 @@ class UserTest extends TestCase
         );
 
         $this->assertEquals(0, count($response['students']));
+    }
+
+    public function test_add_student()
+    {
+        //Register
+
+        $response = $this->register();
+
+        //Get token
+
+        $token = $response['access_token'];
+
+        //Adding student
+
+        $response = $this->post('/api/students',[
+            'firstname' => 'Brayan',
+            'lastname' => 'Duran',
+            'email' => 'brayanduranmedina@gmail.com',
+            'photo' => UploadedFile::fake()->image('image.jpg'),
+            'birthdate' => '2001-9-22',
+            'birthdate' => '2001-9-22',
+            'address' => 'Carrer del Clot',
+            'score' => '10',
+        ],
+            ['Authorization' => 'Bearer ' . $token]
+        );
+
+        $response->assertStatus(200);
+
+        //Counting students
+
+        $response = $this->get(
+            '/api/students',
+            ['Authorization' => 'Bearer ' . $token]
+        );
+
+        $response->assertStatus(200);
+
+        $this->assertEquals(1, count($response['students']));
+
+        //Checking storage
+
+        $this->assertTrue(Storage::exists('public/pictures/1.jpg'));
     }
 }
