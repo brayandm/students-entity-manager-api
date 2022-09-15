@@ -10,25 +10,19 @@ use Tests\TestCase;
 use App\User;
 use App\Models\Student;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class UserTest extends TestCase
 {
     use DatabaseMigrations, RefreshDatabase;
 
-    /**
-     * To test the register and get students
-     * @return void
-     */
-    public function test_register_and_get_students()
+    protected function setUp(): void
     {
-        //Filling database
+        parent::setUp();
+    }
 
-        DB::table('students')->insert(['firstname' => 'Brayan']);
-        DB::table('students')->insert(['firstname' => 'Miranda']);
-        DB::table('students')->insert(['firstname' => 'Carlos']);
-
-        //Register
-
+    private function register()
+    {
         $response = $this->post('/api/register',
         ['name' => 'BrayanD',
         'email' => 'brayanduranmedina@gmail.com',
@@ -47,6 +41,25 @@ class UserTest extends TestCase
         $response->assertJsonPath('user.email', 'brayanduranmedina@gmail.com');
         $response->assertJsonPath('token_type', 'Bearer');
 
+        return $response;
+    }
+
+    /**
+     * To test the register and get students
+     * @return void
+     */
+    public function test_register_and_get_students()
+    {
+        //Filling database
+
+        DB::table('students')->insert(['firstname' => 'Brayan']);
+        DB::table('students')->insert(['firstname' => 'Miranda']);
+        DB::table('students')->insert(['firstname' => 'Carlos']);
+
+        //Register
+
+        $response = $this->register();
+
         //Get Token
 
         $token = $response['access_token'];
@@ -61,5 +74,25 @@ class UserTest extends TestCase
         $response->assertJsonPath('students.0.firstname', 'Brayan');
         $response->assertJsonPath('students.1.firstname', 'Miranda');
         $response->assertJsonPath('students.2.firstname', 'Carlos');
+
+        //Logout
+
+        $response = $this->post('/api/logout', [], ['Authorization' => 'Bearer '.$token]);
+
+        $response->assertStatus(200);
+
+        $response->assertJsonPath('message', 'Successful logout');
+
+        $this->app->get('auth')->forgetGuards();
+
+        //Getting students and fails
+
+        $response = $this->get('/api/students',
+        ['Authorization' => 'Bearer '.$token,
+        'Accept' => 'application/json']);
+
+        $response->assertStatus(401);
+
+        $response->assertJsonPath('message', 'Unauthenticated.');
     }
 }
