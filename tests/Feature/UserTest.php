@@ -23,10 +23,14 @@ class UserTest extends TestCase
 
     private function register()
     {
-        $response = $this->post('/api/register',
-        ['name' => 'BrayanD',
-        'email' => 'brayanduranmedina@gmail.com',
-        'password' => '12345678']);
+        $response = $this->post(
+            '/api/register',
+            [
+                'name' => 'BrayanD',
+                'email' => 'brayanduranmedina@gmail.com',
+                'password' => '12345678'
+            ]
+        );
 
         $response->assertStatus(200);
 
@@ -44,10 +48,6 @@ class UserTest extends TestCase
         return $response;
     }
 
-    /**
-     * To test the register and get students
-     * @return void
-     */
     public function test_register_and_get_students()
     {
         //Filling database
@@ -66,8 +66,10 @@ class UserTest extends TestCase
 
         //Getting students
 
-        $response = $this->get('/api/students',
-        ['Authorization' => 'Bearer '.$token]);
+        $response = $this->get(
+            '/api/students',
+            ['Authorization' => 'Bearer ' . $token]
+        );
 
         $response->assertStatus(200);
 
@@ -77,7 +79,7 @@ class UserTest extends TestCase
 
         //Logout
 
-        $response = $this->post('/api/logout', [], ['Authorization' => 'Bearer '.$token]);
+        $response = $this->post('/api/logout', [], ['Authorization' => 'Bearer ' . $token]);
 
         $response->assertStatus(200);
 
@@ -87,12 +89,104 @@ class UserTest extends TestCase
 
         //Getting students and fails
 
-        $response = $this->get('/api/students',
-        ['Authorization' => 'Bearer '.$token,
-        'Accept' => 'application/json']);
+        $response = $this->get(
+            '/api/students',
+            [
+                'Authorization' => 'Bearer ' . $token,
+                'Accept' => 'application/json'
+            ]
+        );
 
         $response->assertStatus(401);
 
         $response->assertJsonPath('message', 'Unauthenticated.');
+    }
+
+    public function test_get_student_by_id()
+    {
+        //Filling database
+
+        Student::factory(10)->create();
+
+        //Register
+
+        $response = $this->register();
+
+        //Get Token
+
+        $token = $response['access_token'];
+
+        //Getting students
+
+        $response = $this->get(
+            '/api/students',
+            ['Authorization' => 'Bearer ' . $token]
+        );
+
+        $this->assertEquals(10, count($response['students']));
+
+        //Getting students by id
+
+        $response = $this->get(
+            '/api/students/1',
+            ['Authorization' => 'Bearer ' . $token]
+        );
+
+        $response->assertJsonStructure([
+            'students' =>
+            ['id',
+            'firstname',
+            'lastname',
+            'email',
+            'photo',
+            'birthdate',
+            'address',
+            'score',
+            'created_at',
+            'updated_at']
+        ]);
+    }
+
+    public function test_delete_students()
+    {
+        //Filling database
+
+        Student::factory(10)->create();
+
+        //Register
+
+        $response = $this->register();
+
+        //Get Token
+
+        $token = $response['access_token'];
+
+        //Getting students
+
+        $response = $this->get(
+            '/api/students',
+            ['Authorization' => 'Bearer ' . $token]
+        );
+
+        $this->assertEquals(10, count($response['students']));
+
+        //Deleting students
+
+        for ($i = 1; $i <=10; $i++)
+        {
+            $response = $this->delete(
+                '/api/students/'.$i,
+                ['Authorization' => 'Bearer ' . $token]
+            );
+        }
+
+        //Counting students
+
+        $response = $this->get(
+            '/api/students',
+            ['Authorization' => 'Bearer ' . $token]
+        );
+
+        $this->assertEquals(0, count($response['students']));
     }
 }
