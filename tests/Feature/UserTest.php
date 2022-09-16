@@ -411,6 +411,8 @@ class UserTest extends TestCase
 
         $token = $response['access_token'];
 
+        //Adding student
+
         $response = $this->post('/api/students',[
             'firstname' => 'Brayan',
             'lastname' => 'Duran',
