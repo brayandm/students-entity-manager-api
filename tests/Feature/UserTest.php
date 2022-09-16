@@ -47,6 +47,8 @@ class UserTest extends TestCase
         $response->assertJsonPath('user.email', 'brayanduranmedina@gmail.com');
         $response->assertJsonPath('token_type', 'Bearer');
 
+        $this->app->get('auth')->forgetGuards();
+
         return $response;
     }
 
@@ -233,5 +235,202 @@ class UserTest extends TestCase
         //Checking storage
 
         $this->assertTrue(Storage::exists('public/pictures/1.jpg'));
+    }
+
+    public function test_login_and_logout()
+    {
+        //Register format incorrect
+
+        $response = $this->post(
+            '/api/register',
+            [
+                'name' => 'BrayanD',
+                'email' => 'brayanduranmedina',
+                'password' => '12345678'
+            ]
+        );
+
+        $response->assertStatus(400);
+
+        //Register
+
+        $response = $this->register();
+
+        //Login format incorrect
+
+        $response = $this->post('/api/login', [
+            'email' => 'brayanduranmedina',
+            'password' => '12345678'
+        ]);
+
+        $response->assertStatus(400);
+
+        $this->app->get('auth')->forgetGuards();
+
+        //Login unauthenticated
+
+        $response = $this->post('/api/login', [
+            'email' => 'brayanduranmedina@gmail.com',
+            'password' => '123456789'
+        ]);
+
+        $response->assertStatus(401);
+
+        $this->app->get('auth')->forgetGuards();
+
+        //Login
+
+        $response = $this->post('/api/login', [
+            'email' => 'brayanduranmedina@gmail.com',
+            'password' => '12345678'
+        ]);
+
+        $response->assertStatus(200);
+
+        $this->app->get('auth')->forgetGuards();
+
+        //Get token
+
+        $token = $response['access_token'];
+
+        //Logout
+
+        $response = $this->post('/api/logoutall', [], ['Authorization' => 'Bearer ' . $token]);
+
+        $response->assertStatus(200);
+
+        $response->assertJsonPath('message', 'Successful logout');
+
+        $this->app->get('auth')->forgetGuards();
+    }
+
+    public function test_get_add_delete_edit_fails()
+    {
+        //Register
+
+        $response = $this->register();
+
+        //Get token
+
+        $token = $response['access_token'];
+
+        //Get student
+
+        $response = $this->get('/api/students/1', ['Authorization' => 'Bearer ' . $token]);
+
+        $response->assertStatus(400);
+
+        //Add student
+
+        $response = $this->post('/api/students', [], ['Authorization' => 'Bearer ' . $token]);
+
+        $response->assertStatus(400);
+
+        //Delete student
+
+        $response = $this->delete('/api/students/1', ['Authorization' => 'Bearer ' . $token]);
+
+        $response->assertStatus(400);
+
+        //Edit student
+
+        $response = $this->post('/api/students/1', [], ['Authorization' => 'Bearer ' . $token]);
+
+        $response->assertStatus(400);
+    }
+
+    public function test_edit()
+    {
+        //Register
+
+        $response = $this->register();
+
+        //Get token
+
+        $token = $response['access_token'];
+
+        //Adding student
+
+        $response = $this->post('/api/students',[
+            'firstname' => 'Brayan',
+            'lastname' => 'Duran',
+            'email' => 'brayanduranmedina@gmail.com',
+            'photo' => UploadedFile::fake()->image('image.jpg'),
+            'birthdate' => '2001-9-22',
+            'birthdate' => '2001-9-22',
+            'address' => 'Carrer del Clot',
+            'score' => '10',
+        ],
+            ['Authorization' => 'Bearer ' . $token]
+        );
+
+        $response->assertStatus(200);
+
+        //Editing student fails incorrect email
+
+        $response = $this->post('/api/students/1',[
+            'firstname' => 'Brayan',
+            'lastname' => 'Duran',
+            'email' => 'brayanduranmedina',
+            'photo' => UploadedFile::fake()->image('image.jpg'),
+            'birthdate' => '2001-9-22',
+            'birthdate' => '2001-9-22',
+            'address' => 'Carrer del Clot',
+            'score' => '10',
+        ],
+            ['Authorization' => 'Bearer ' . $token]
+        );
+
+        $response->assertStatus(400);
+
+        //Editing student
+
+        $response = $this->post('/api/students/1',[
+            'firstname' => 'Brayan',
+            'lastname' => 'Duran',
+            'email' => 'brayanduranmedina@gmail.com',
+            'photo' => UploadedFile::fake()->image('image.jpg'),
+            'birthdate' => '2001-9-22',
+            'birthdate' => '2001-9-22',
+            'address' => 'Carrer del Clot',
+            'score' => '10',
+        ],
+            ['Authorization' => 'Bearer ' . $token]
+        );
+
+        $response->assertStatus(200);
+    }
+
+    public function test_get_photo()
+    {
+        //Register
+
+        $response = $this->register();
+
+        //Get token
+
+        $token = $response['access_token'];
+
+        $response = $this->post('/api/students',[
+            'firstname' => 'Brayan',
+            'lastname' => 'Duran',
+            'email' => 'brayanduranmedina@gmail.com',
+            'photo' => UploadedFile::fake()->image('image.jpg'),
+            'birthdate' => '2001-9-22',
+            'birthdate' => '2001-9-22',
+            'address' => 'Carrer del Clot',
+            'score' => '10',
+        ],
+            ['Authorization' => 'Bearer ' . $token]
+        );
+
+        $response->assertStatus(200);
+
+        //Getting photo
+
+        $response = $this->get('/api/pictures/1.jpg',
+         ['Authorization' => 'Bearer ' . $token]);
+
+        $response->assertStatus(200);
     }
 }
