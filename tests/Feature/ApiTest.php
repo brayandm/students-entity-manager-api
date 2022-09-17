@@ -13,7 +13,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
-class UserTest extends TestCase
+class ApiTest extends TestCase
 {
     use DatabaseMigrations, RefreshDatabase;
 
