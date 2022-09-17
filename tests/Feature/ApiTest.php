@@ -127,6 +127,8 @@ class ApiTest extends TestCase
             ['Authorization' => 'Bearer ' . $token]
         );
 
+        $response->assertStatus(200);
+
         $this->assertEquals(10, count($response['students']));
 
         //Getting students by id
@@ -135,6 +137,8 @@ class ApiTest extends TestCase
             '/api/students/1',
             ['Authorization' => 'Bearer ' . $token]
         );
+
+        $response->assertStatus(200);
 
         $response->assertJsonStructure([
             'students' =>
@@ -172,6 +176,8 @@ class ApiTest extends TestCase
             ['Authorization' => 'Bearer ' . $token]
         );
 
+        $response->assertStatus(200);
+
         $this->assertEquals(10, count($response['students']));
 
         //Deleting students
@@ -184,12 +190,16 @@ class ApiTest extends TestCase
             );
         }
 
+        $response->assertStatus(200);
+
         //Counting students
 
         $response = $this->get(
             '/api/students',
             ['Authorization' => 'Bearer ' . $token]
         );
+
+        $response->assertStatus(200);
 
         $this->assertEquals(0, count($response['students']));
     }
