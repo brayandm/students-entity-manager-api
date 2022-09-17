@@ -222,7 +222,6 @@ class ApiTest extends TestCase
             'email' => 'brayanduranmedina@gmail.com',
             'photo' => UploadedFile::fake()->image('image.jpg'),
             'birthdate' => '2001-9-22',
-            'birthdate' => '2001-9-22',
             'address' => 'Carrer del Clot',
             'score' => '10',
         ],
