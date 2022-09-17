@@ -188,9 +188,9 @@ class ApiTest extends TestCase
                 '/api/students/'.$i,
                 ['Authorization' => 'Bearer ' . $token]
             );
-        }
 
-        $response->assertStatus(200);
+            $response->assertStatus(200);
+        }
 
         //Counting students
 
