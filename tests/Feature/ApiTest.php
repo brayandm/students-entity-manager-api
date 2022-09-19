@@ -34,6 +34,22 @@ class ApiTest extends TestCase
             ]
         );
 
+        $this->app->get('auth')->forgetGuards();
+
+        return $response;
+    }
+
+    public function test_register()
+    {
+        $response = $this->post(
+            '/api/register',
+            [
+                'name' => 'BrayanD',
+                'email' => 'brayanduranmedina@gmail.com',
+                'password' => '12345678'
+            ]
+        );
+
         $response->assertStatus(200);
 
         $response->assertJsonStructure([
@@ -47,6 +63,8 @@ class ApiTest extends TestCase
         $response->assertJsonPath('user.email', 'brayanduranmedina@gmail.com');
         $response->assertJsonPath('token_type', 'Bearer');
 
+        $this->assertDatabaseHas('users', ['name' => 'BrayanD', 'email' => 'brayanduranmedina@gmail.com']);
+
         $this->app->get('auth')->forgetGuards();
 
         return $response;
@@ -56,9 +74,9 @@ class ApiTest extends TestCase
     {
         //Filling database
 
-        DB::table('students')->insert(['firstname' => 'Brayan']);
-        DB::table('students')->insert(['firstname' => 'Miranda']);
-        DB::table('students')->insert(['firstname' => 'Carlos']);
+        Student::factory()->create(['firstname' => 'Brayan']);
+        Student::factory()->create(['firstname' => 'Miranda']);
+        Student::factory()->create(['firstname' => 'Carlos']);
 
         //Register
 
@@ -159,7 +177,8 @@ class ApiTest extends TestCase
     {
         //Filling database
 
-        Student::factory(10)->create();
+        Student::factory()->create(['email' => 'bdm@gmail.com']);
+        Student::factory(9)->create();
 
         //Register
 
@@ -169,39 +188,18 @@ class ApiTest extends TestCase
 
         $token = $response['access_token'];
 
-        //Getting students
+        //Delete student
 
-        $response = $this->get(
-            '/api/students',
+        $response = $this->delete(
+            '/api/students/1',[],
             ['Authorization' => 'Bearer ' . $token]
         );
 
         $response->assertStatus(200);
-
-        $this->assertEquals(10, count($response['students']));
-
-        //Deleting students
-
-        for ($i = 1; $i <=10; $i++)
-        {
-            $response = $this->delete(
-                '/api/students/'.$i,
-                ['Authorization' => 'Bearer ' . $token]
-            );
-
-            $response->assertStatus(200);
-        }
 
         //Counting students
 
-        $response = $this->get(
-            '/api/students',
-            ['Authorization' => 'Bearer ' . $token]
-        );
-
-        $response->assertStatus(200);
-
-        $this->assertEquals(0, count($response['students']));
+        $this->assertDatabaseMissing('users', ['email' => 'bdm@gmail.com']);
     }
 
     public function test_add_student()
@@ -337,7 +335,7 @@ class ApiTest extends TestCase
 
         //Delete student
 
-        $response = $this->delete('/api/students/1', ['Authorization' => 'Bearer ' . $token]);
+        $response = $this->delete('/api/students/1', [], ['Authorization' => 'Bearer ' . $token]);
 
         $response->assertStatus(400);
 
